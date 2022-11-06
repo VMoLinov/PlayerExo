@@ -1,8 +1,6 @@
 package ru.test.playerexo.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import ru.test.playerexo.app.Resource
 import ru.test.playerexo.model.ui.ChannelUI
 
 interface MainRepository {

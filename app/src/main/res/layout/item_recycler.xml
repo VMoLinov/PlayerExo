@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/image"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="@dimen/channel_image_size"
+        android:layout_height="@dimen/channel_image_size"
         android:layout_margin="8dp"
         android:contentDescription="@string/channel_icon"
         app:layout_constraintBottom_toBottomOf="parent"

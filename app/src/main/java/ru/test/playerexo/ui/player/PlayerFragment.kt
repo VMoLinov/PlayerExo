@@ -1,22 +1,20 @@
 package ru.test.playerexo.ui.player
 
 import android.content.pm.ActivityInfo
-import android.content.res.Resources
 import android.os.Bundle
-import android.util.TypedValue
-import android.view.Gravity
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import ru.test.playerexo.MainActivity
@@ -31,9 +29,9 @@ class PlayerFragment : Fragment(), Player.Listener {
     private lateinit var player: ExoPlayer
     private lateinit var settingsBtn: ImageView
     private lateinit var bitRates: LinearLayoutCompat
-    private lateinit var trackSelector: DefaultTrackSelector
+    private lateinit var trackSelector: AppPlayerSelector
+    private var qualityList = ArrayList<Pair<String, TrackSelectionOverrides.Builder>>()
     private var activeTrack = 0
-    var qualityList = ArrayList<Pair<String, TrackSelectionOverrides.Builder>>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -46,67 +44,54 @@ class PlayerFragment : Fragment(), Player.Listener {
         return binding.root
     }
 
+    @Suppress("DEPRECATION")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val channel: ChannelUI? = arguments?.getParcelable(KEY)
-        trackSelector = DefaultTrackSelector(requireContext(), AdaptiveTrackSelection.Factory())
+        val channelUI = arguments?.getParcelable<ChannelUI>(KEY)
+        if (channelUI != null) {
+            playerInit()
+            buttonsInit(view)
+            fieldsInit(view, channelUI)
+        }
+    }
+
+    private fun playerInit() {
+        trackSelector = AppPlayerSelector(requireContext(), AdaptiveTrackSelection.Factory())
         player = ExoPlayer.Builder(requireContext()).setTrackSelector(trackSelector).build()
         binding.playerView.player = player
-        if (channel != null) {
-            val defaultHttpDataSourceFactory = DefaultHttpDataSource.Factory()
-            val mediaItem = MediaItem.fromUri(
-                "https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8"
-//                    "https://devstreaming-cdn.apple.com/videos/" +
-//                            "streaming/examples/img_bipbop_adv_example_fmp4" +
-//                            "/master.m3u8"
-            )
-            val mediaSource =
-                HlsMediaSource.Factory(defaultHttpDataSourceFactory).createMediaSource(mediaItem)
-            player.setMediaSource(mediaSource)
-            player.addListener(this)
-            player.prepare()
+        val mediaSource = HlsMediaSource
+            .Factory(DefaultHttpDataSource.Factory())
+            .createMediaSource(MediaItem.fromUri(TEST_LINK_2))
+        player.apply {
+            setMediaSource(mediaSource)
+            addListener(this@PlayerFragment)
+            prepare()
         }
-        bitRates = binding.root.findViewById(R.id.bitRates)
+    }
+
+    private fun buttonsInit(view: View) {
+        bitRates = view.findViewById(R.id.bitRates)
         binding.playerView.setControllerVisibilityListener {
             if (it == View.GONE) bitRates.isVisible = false
         }
         settingsBtn = view.findViewById(com.google.android.exoplayer2.ui.R.id.exo_settings)
         settingsBtn.setOnClickListener { bitRates.isVisible = !bitRates.isVisible }
-    }
-
-    fun DefaultTrackSelector.generateQualityList(): ArrayList<Pair<String, TrackSelectionOverrides.Builder>> {
-        val trackOverrideList = ArrayList<Pair<String, TrackSelectionOverrides.Builder>>()
-        val renderTrack = this.currentMappedTrackInfo
-        val renderCount = renderTrack?.rendererCount ?: 0
-        for (rendererIndex in 0 until renderCount) {
-            if (isSupportedFormat(renderTrack, rendererIndex)) {
-                val trackGroupType = renderTrack?.getRendererType(rendererIndex)
-                val trackGroups = renderTrack?.getTrackGroups(rendererIndex)
-                val trackGroupsCount = trackGroups?.length!!
-                if (trackGroupType == C.TRACK_TYPE_VIDEO) {
-                    for (groupIndex in 0 until trackGroupsCount) {
-                        val videoQualityTrackCount = trackGroups[groupIndex].length
-                        for (trackIndex in 0 until videoQualityTrackCount) {
-                            val isTrackSupported = renderTrack.getTrackSupport(
-                                rendererIndex, groupIndex, trackIndex
-                            ) == C.FORMAT_HANDLED
-                            if (isTrackSupported) {
-                                val track = trackGroups[groupIndex]
-                                val trackName = "${track.getFormat(trackIndex).height}p"
-                                val trackBuilder = TrackSelectionOverrides.Builder()
-                                    .clearOverridesOfType(C.TRACK_TYPE_VIDEO).addOverride(
-                                        TrackSelectionOverrides.TrackSelectionOverride(
-                                            track, listOf(trackIndex)
-                                        )
-                                    )
-                                trackOverrideList.add(Pair(trackName, trackBuilder))
-                            }
-                        }
-                    }
-                }
+        view.findViewById<ImageView>(R.id.backBtn).apply {
+            setOnClickListener {
+                parentFragmentManager.popBackStack()
             }
         }
-        return trackOverrideList
+    }
+
+    private fun fieldsInit(view: View, channelUI: ChannelUI) {
+        view.apply {
+            findViewById<ImageView>(R.id.channelImage).apply {
+                Glide.with(view).load(channelUI.image).into(this)
+            }
+            findViewById<TextView>(R.id.headerPlayer).text = channelUI.current.title
+            findViewById<TextView>(R.id.channelNamePlayer).text = channelUI.nameRu
+            findViewById<TextView>(R.id.timeLeft).text = "Осталось 12 минут"
+        }
     }
 
     private fun setUpQualityList() {
@@ -114,63 +99,39 @@ class PlayerFragment : Fragment(), Player.Listener {
         qualityList.let {
             for ((index, videoQuality) in it.withIndex().reversed()) {
                 bitRates.addView(BitrateItem(requireContext()).apply {
-                    setBackground(
-                        index == activeTrack,
-                        index == 0,
-                        index + 1 == qualityList.size
-                    )
-                    text = videoQuality.first
-                    gravity = Gravity.CENTER
-                    minHeight = 40f.toPx.toInt()
-                    minWidth = 128f.toPx.toInt()
-                    setOnClickListener {
-                        activeTrack = index
-                        qualityList[index].let { pair ->
-                            trackSelector.parameters = trackSelector.parameters.buildUpon()
-                                .setTrackSelectionOverrides(pair.second.build())
-                                .setTunnelingEnabled(true).build()
-                        }
-                    }
+                    buildView(index, activeTrack, qualityList.size, videoQuality.first)
+                    clickListener(index)
                 })
             }
         }
     }
 
-    private val Number.toPx
-        get() = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), Resources.getSystem().displayMetrics
-        )
-
-    override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
-        println("TRACK CHANGED")
-        println(tracksInfo.trackGroupInfos)
-    }
-
-    override fun onPlaybackStateChanged(playbackState: Int) {
-        if (playbackState == Player.STATE_READY) {
-            trackSelector.generateQualityList().let {
-                qualityList = it
-                qualityList.add(
-                    0, Pair(
-                        "Auto",
-                        TrackSelectionOverrides.Builder().clearOverridesOfType(C.TRACK_TYPE_VIDEO)
-                    )
-                )
-                setUpQualityList()
+    private fun BitrateItem.clickListener(index: Int) {
+        setOnClickListener {
+            activeTrack = index
+            qualityList[index].let { pair ->
+                trackSelector.parameters = trackSelector.parameters.buildUpon()
+                    .setTrackSelectionOverrides(pair.second.build())
+                    .setTunnelingEnabled(true).build()
             }
         }
     }
 
-    private fun releasePlayer() {
-        player.release()
+    override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
+        Log.d(FRAGMENT_NAME, "onTracksInfoChanged: TRACK CHANGED")
+        Log.d(FRAGMENT_NAME, "onTracksInfoChanged: ${tracksInfo.trackGroupInfos}")
     }
 
-    fun isSupportedFormat(
-        mappedTrackInfo: MappingTrackSelector.MappedTrackInfo?, rendererIndex: Int
-    ): Boolean {
-        val trackGroupArray = mappedTrackInfo?.getTrackGroups(rendererIndex)
-        return if (trackGroupArray?.length == 0) false
-        else mappedTrackInfo?.getRendererType(rendererIndex) == C.TRACK_TYPE_VIDEO
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        if (playbackState == Player.STATE_READY) {
+            val cleanSelector = TrackSelectionOverrides.Builder()
+                .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+            trackSelector.generateQualityList().let {
+                qualityList = it
+                qualityList.add(0, Pair("AUTO", cleanSelector))
+                setUpQualityList()
+            }
+        }
     }
 
     override fun onResume() {
@@ -185,11 +146,17 @@ class PlayerFragment : Fragment(), Player.Listener {
 
     override fun onDestroy() {
         _binding = null
-        releasePlayer()
+        player.release()
         super.onDestroy()
     }
 
     companion object {
+        //        const val TEST_LINK_1 = "https://devstreaming-cdn.apple.com/videos/" +
+//                "streaming/examples/img_bipbop_adv_example_fmp4" +
+//                "/master.m3u8"
+        const val TEST_LINK_2 = "https://bitdash-a.akamaihd.net/content/" +
+                "MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8"
+        const val FRAGMENT_NAME = "PlayerFragment"
         private const val KEY = "KEY"
         fun newInstance(channel: ChannelUI): PlayerFragment {
             val b = Bundle().also { it.putParcelable(KEY, channel) }

@@ -9,4 +9,5 @@
     <string name="enter_channel_name">Напишите название телеканала</string>
     <string name="bitrate">Bitrate</string>
     <string name="play_stop">Play stop</string>
+    <string name="back_button">Back button</string>
 </resources>

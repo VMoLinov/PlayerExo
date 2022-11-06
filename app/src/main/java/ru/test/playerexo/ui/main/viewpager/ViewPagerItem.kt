@@ -1,5 +1,6 @@
 package ru.test.playerexo.ui.main.viewpager
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +13,8 @@ import androidx.lifecycle.ViewModelProvider
 import ru.test.playerexo.R
 import ru.test.playerexo.databinding.FragmentViewPagerItemBinding
 import ru.test.playerexo.model.ui.ChannelUI
-import ru.test.playerexo.ui.main.adapter.OnRecycleClickListener
 import ru.test.playerexo.ui.main.adapter.ChannelsAdapter
+import ru.test.playerexo.ui.main.adapter.OnRecycleClickListener
 import ru.test.playerexo.ui.player.PlayerFragment
 import ru.test.playerexo.viewmodel.MainViewModel
 import ru.test.playerexo.viewmodel.MainViewModelFactory
@@ -49,6 +50,7 @@ class ViewPagerItem : Fragment() {
         setViewModel()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun refreshAdapter(it: List<ChannelUI>?) {
         adapter.submitList(it)
         adapter.notifyDataSetChanged()
