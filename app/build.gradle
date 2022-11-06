@@ -65,5 +65,5 @@ dependencies {
     kapt "androidx.room:room-compiler:2.4.3"
 
     // Exo Player
-    implementation "com.google.android.exoplayer:exoplayer:2.18.1"
+    implementation "com.google.android.exoplayer:exoplayer:2.16.1"
 }

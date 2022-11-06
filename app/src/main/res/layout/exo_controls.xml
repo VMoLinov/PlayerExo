@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <View
-        android:id="@id/exo_controls_background"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/exo_black_opacity_60" />
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/bitRates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:background="@android:color/transparent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/exo_bottom_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
 
     <FrameLayout
         android:id="@id/exo_bottom_bar"
@@ -16,7 +23,10 @@
         android:layout_height="80dp"
         android:layout_gravity="bottom"
         android:background="@drawable/exo_background"
-        android:layoutDirection="ltr">
+        android:layoutDirection="ltr"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:id="@id/exo_time"
@@ -51,9 +61,9 @@
         android:id="@id/exo_progress_placeholder"
         android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:layout_gravity="bottom"
         android:layout_marginHorizontal="12dp"
-        android:paddingBottom="16dp" />
+        android:paddingBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <LinearLayout
         android:id="@id/exo_center_controls"
@@ -63,7 +73,11 @@
         android:background="@android:color/transparent"
         android:clipToPadding="false"
         android:gravity="center"
-        android:padding="@dimen/exo_styled_controls_padding">
+        android:padding="@dimen/exo_styled_controls_padding"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@id/exo_play_pause"
@@ -71,4 +85,4 @@
             android:contentDescription="@string/play_stop"
             android:visibility="gone" />
     </LinearLayout>
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,4 +12,5 @@
     <color name="background">#343438</color>
     <color name="recycle_background">#232427</color>
     <color name="finder">#808185</color>
+    <color name="bitrate_active">#0077FF</color>
 </resources>
