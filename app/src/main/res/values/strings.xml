@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">PlayerExo</string>
+    <string name="tab_main">Все</string>
+    <string name="tab_favorites">Избранное</string>
+    <string name="channel_icon">Channel icon</string>
+    <string name="favorites">Favorites</string>
+    <string name="recycler_reload">Загрузить снова</string>
+    <string name="find_icon">FInd icon</string>
+    <string name="enter_channel_name">Напишите название телеканала</string>
+    <string name="bitrate">Bitrate</string>
+    <string name="play_stop">Play stop</string>
+</resources>
