@@ -13,7 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-/app/src/main/res/xml/backup_rules.xml
 /.idea/compiler.xml
 /example.txt
 /.idea/misc.xml
