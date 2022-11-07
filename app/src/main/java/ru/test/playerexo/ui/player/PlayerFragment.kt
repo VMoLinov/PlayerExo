@@ -59,8 +59,8 @@ class PlayerFragment : Fragment(), Player.Listener {
         trackSelector = AppPlayerSelector(requireContext(), AdaptiveTrackSelection.Factory())
         val mediaSource = HlsMediaSource
             .Factory(DefaultHttpDataSource.Factory())
-            .createMediaSource(MediaItem.fromUri(TEST_LINK_2))
-//            .createMediaSource(MediaItem.fromUri(url)) // Replace this instead of previous, when source will be work
+//            .createMediaSource(MediaItem.fromUri(TEST_LINK_2))
+            .createMediaSource(MediaItem.fromUri(url)) // Replace this instead of previous, when source will be work
         player = ExoPlayer.Builder(requireContext()).setTrackSelector(trackSelector)
             .build().apply {
                 binding.playerView.player = this
