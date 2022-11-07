@@ -10,4 +10,5 @@
     <string name="bitrate">Bitrate</string>
     <string name="play_stop">Play stop</string>
     <string name="back_button">Back button</string>
+    <string name="time_remaining">Осталось %d минут</string>
 </resources>

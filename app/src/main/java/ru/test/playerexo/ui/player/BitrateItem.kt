@@ -28,15 +28,11 @@ class BitrateItem(context: Context) : AppCompatTextView(context) {
     }
 
     fun buildView(
-        index: Int,
-        activeTrack: Int,
-        qualityList: Int,
-        qualityString: String
+        index: Int, activeTrack: Int, qualityList: Int, qualityString: String
     ) {
         setBackground(index == activeTrack, index == 0, index + 1 == qualityList)
         text = qualityString
         gravity = Gravity.CENTER
-//        textSize = 16f.spToPx
         minHeight = HEIGHT.dpToPx
         minWidth = WIDTH.dpToPx
     }
@@ -45,11 +41,6 @@ class BitrateItem(context: Context) : AppCompatTextView(context) {
         get() = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), Resources.getSystem().displayMetrics
         ).toInt()
-
-//    private val Number.spToPx
-//        get() = TypedValue.applyDimension(
-//            TypedValue.COMPLEX_UNIT_SP, this.toFloat(), Resources.getSystem().displayMetrics
-//        )
 
     companion object {
         const val HEIGHT = 40f

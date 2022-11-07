@@ -49,31 +49,29 @@ class PlayerFragment : Fragment(), Player.Listener {
         super.onViewCreated(view, savedInstanceState)
         val channelUI = arguments?.getParcelable<ChannelUI>(KEY)
         if (channelUI != null) {
-            playerInit()
+            playerInit(channelUI.url)
             buttonsInit(view)
             fieldsInit(view, channelUI)
         }
     }
 
-    private fun playerInit() {
+    private fun playerInit(url: String) {
         trackSelector = AppPlayerSelector(requireContext(), AdaptiveTrackSelection.Factory())
-        player = ExoPlayer.Builder(requireContext()).setTrackSelector(trackSelector).build()
-        binding.playerView.player = player
         val mediaSource = HlsMediaSource
             .Factory(DefaultHttpDataSource.Factory())
             .createMediaSource(MediaItem.fromUri(TEST_LINK_2))
-        player.apply {
-            setMediaSource(mediaSource)
-            addListener(this@PlayerFragment)
-            prepare()
-        }
+//            .createMediaSource(MediaItem.fromUri(url)) // Replace this instead of previous, when source will be work
+        player = ExoPlayer.Builder(requireContext()).setTrackSelector(trackSelector)
+            .build().apply {
+                binding.playerView.player = this
+                setMediaSource(mediaSource)
+                addListener(this@PlayerFragment)
+                prepare()
+            }
     }
 
     private fun buttonsInit(view: View) {
         bitRates = view.findViewById(R.id.bitRates)
-        binding.playerView.setControllerVisibilityListener {
-            if (it == View.GONE) bitRates.isVisible = false
-        }
         settingsBtn = view.findViewById(com.google.android.exoplayer2.ui.R.id.exo_settings)
         settingsBtn.setOnClickListener { bitRates.isVisible = !bitRates.isVisible }
         view.findViewById<ImageView>(R.id.backBtn).apply {
@@ -90,8 +88,19 @@ class PlayerFragment : Fragment(), Player.Listener {
             }
             findViewById<TextView>(R.id.headerPlayer).text = channelUI.current.title
             findViewById<TextView>(R.id.channelNamePlayer).text = channelUI.nameRu
-            findViewById<TextView>(R.id.timeLeft).text = "Осталось 12 минут"
+            setTimeRemaining(channelUI.current.timeStop, view)
+            binding.playerView.setControllerVisibilityListener {
+                if (it == View.GONE) bitRates.isVisible = false
+                setTimeRemaining(channelUI.current.timeStop, view)
+            }
         }
+    }
+
+    private fun setTimeRemaining(timeStop: Long, view: View) {
+        val remaining = System.currentTimeMillis() - timeStop
+        val timeLeft = remaining / 60000
+        view.findViewById<TextView>(R.id.timeLeft).text =
+            String.format(getString(R.string.time_remaining), timeLeft)
     }
 
     private fun setUpQualityList() {
@@ -156,8 +165,8 @@ class PlayerFragment : Fragment(), Player.Listener {
 //                "/master.m3u8"
         const val TEST_LINK_2 = "https://bitdash-a.akamaihd.net/content/" +
                 "MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8"
-        const val FRAGMENT_NAME = "PlayerFragment"
-        private const val KEY = "KEY"
+        val FRAGMENT_NAME: String = PlayerFragment::class.java.simpleName
+        private const val KEY = "keyPlayerFragment"
         fun newInstance(channel: ChannelUI): PlayerFragment {
             val b = Bundle().also { it.putParcelable(KEY, channel) }
             return PlayerFragment().also { it.arguments = b }

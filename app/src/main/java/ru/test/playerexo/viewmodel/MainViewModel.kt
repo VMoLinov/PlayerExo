@@ -21,7 +21,7 @@ class MainViewModel(
         getData()
     }
 
-    fun getData() {
+    private fun getData() {
         viewModelScope.launch {
             repository.getData()
         }
@@ -37,7 +37,7 @@ class MainViewModel(
     fun finderRefresh(string: String) {
         if (string.isNotEmpty()) {
             finderData.postValue(allData.value?.filter {
-                it.nameRu.contains(string, false)
+                it.nameRu.contains(string, true)
             })
         } else finderData.postValue(null)
     }
