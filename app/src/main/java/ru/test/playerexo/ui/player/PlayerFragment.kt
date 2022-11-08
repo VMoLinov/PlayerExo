@@ -15,7 +15,7 @@ import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
-import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverride
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import ru.test.playerexo.MainActivity
 import ru.test.playerexo.R
@@ -30,7 +30,7 @@ class PlayerFragment : Fragment(), Player.Listener {
     private lateinit var settingsBtn: ImageView
     private lateinit var bitRates: LinearLayoutCompat
     private lateinit var trackSelector: AppPlayerSelector
-    private var qualityList = ArrayList<Pair<String, TrackSelectionOverrides.Builder>>()
+    private var qualityList = ArrayList<Pair<String, TrackSelectionOverride>>()
     private var activeTrack = 0
 
     override fun onCreateView(
@@ -118,26 +118,28 @@ class PlayerFragment : Fragment(), Player.Listener {
     private fun BitrateItem.clickListener(index: Int) {
         setOnClickListener {
             activeTrack = index
-            qualityList[index].let { pair ->
-                trackSelector.parameters = trackSelector.parameters.buildUpon()
-                    .setTrackSelectionOverrides(pair.second.build())
-                    .setTunnelingEnabled(true).build()
+            if (index == 0) trackSelector.parameters = trackSelector.parameters.buildUpon()
+                .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                .build()
+            else {
+                qualityList[index].let { pair ->
+                    trackSelector.parameters = trackSelector.parameters.buildUpon()
+                        .setOverrideForType(pair.second)
+                        .setTunnelingEnabled(true).build()
+                }
             }
         }
     }
 
-    override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
+    override fun onTracksChanged(tracks: Tracks) {
         Log.d(FRAGMENT_NAME, "onTracksInfoChanged: TRACK CHANGED")
-        Log.d(FRAGMENT_NAME, "onTracksInfoChanged: ${tracksInfo.trackGroupInfos}")
+        Log.d(FRAGMENT_NAME, "onTracksInfoChanged: ${tracks.groups}")
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
         if (playbackState == Player.STATE_READY) {
-            val cleanSelector = TrackSelectionOverrides.Builder()
-                .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
             trackSelector.generateQualityList().let {
-                qualityList = it
-                qualityList.add(0, Pair("AUTO", cleanSelector))
+                qualityList = it!!
                 setUpQualityList()
             }
         }

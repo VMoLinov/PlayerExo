@@ -5,9 +5,8 @@ import ru.test.playerexo.model.local.ChannelDB
 import ru.test.playerexo.model.ui.ChannelUI
 import ru.test.playerexo.repository.local.LocalSource
 import ru.test.playerexo.repository.network.NetworkSource
-import javax.inject.Inject
 
-class MainRepositoryImpl @Inject constructor(
+class MainRepositoryImpl(
     private val local: LocalSource,
     private val network: NetworkSource
 ) : MainRepository {

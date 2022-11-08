@@ -5,7 +5,7 @@ import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.source.TrackGroupArray
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverride
 
 class AppPlayerSelector(
     context: Context, factory: AdaptiveTrackSelection.Factory
@@ -13,18 +13,25 @@ class AppPlayerSelector(
 
     private var renderCount = 0
     private var renderTrack: MappedTrackInfo? = null
-    private var trackOverrideList =
-        ArrayList<Pair<String, TrackSelectionOverrides.Builder>>()
+    private var trackOverrideList: ArrayList<Pair<String, TrackSelectionOverride>>? = null
 
     internal fun generateQualityList():
-            ArrayList<Pair<String, TrackSelectionOverrides.Builder>> {
+            ArrayList<Pair<String, TrackSelectionOverride>>? {
         trackOverrideList = arrayListOf()
         renderTrack = this.currentMappedTrackInfo
         renderCount = renderTrack?.rendererCount ?: 0
         for (rendererIndex in 0 until renderCount) {
             checkType(rendererIndex)
         }
+        addZeroGroupForAutoQuality()
         return trackOverrideList
+    }
+
+    private fun addZeroGroupForAutoQuality() {
+        val trackGroup = renderTrack?.getTrackGroups(0)?.get(0)
+        trackGroup?.let {
+            trackOverrideList?.add(0, Pair(AUTO, TrackSelectionOverride(trackGroup, 0)))
+        }
     }
 
     private fun checkType(rendererIndex: Int) {
@@ -59,12 +66,8 @@ class AppPlayerSelector(
     ) {
         val track = trackGroups[groupIndex]
         val trackName = "${track.getFormat(trackIndex).height}$QUALITY_SUFFIX"
-        val trackBuilder = TrackSelectionOverrides.Builder()
-            .clearOverridesOfType(C.TRACK_TYPE_VIDEO).addOverride(
-                TrackSelectionOverrides
-                    .TrackSelectionOverride(track, listOf(trackIndex))
-            )
-        trackOverrideList.add(Pair(trackName, trackBuilder))
+        val trackBuilder = TrackSelectionOverride(track, listOf(trackIndex))
+        trackOverrideList?.add(Pair(trackName, trackBuilder))
     }
 
     private fun isSupportedFormat(rendererIndex: Int): Boolean {
@@ -75,5 +78,6 @@ class AppPlayerSelector(
 
     companion object {
         const val QUALITY_SUFFIX = "p"
+        const val AUTO = "AUTO"
     }
 }
