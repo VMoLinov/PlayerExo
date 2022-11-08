@@ -1,17 +1,15 @@
 package ru.test.playerexo.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import ru.test.playerexo.model.ui.ChannelUI
 import ru.test.playerexo.repository.MainRepository
 
 class MainViewModel(
-    application: Application,
     private val repository: MainRepository
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     val allData = repository.data
     val favData = repository.favorites

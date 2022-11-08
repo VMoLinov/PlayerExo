@@ -11,11 +11,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.tabs.TabLayoutMediator
 import ru.test.playerexo.MainActivity
 import ru.test.playerexo.R
+import ru.test.playerexo.app.App
 import ru.test.playerexo.databinding.FragmentMainBinding
 import ru.test.playerexo.ui.main.viewpager.ViewPagerAdapter
 import ru.test.playerexo.utils.AppTextWatcher
 import ru.test.playerexo.viewmodel.MainViewModel
-import ru.test.playerexo.viewmodel.MainViewModelFactory
 
 class MainFragment : Fragment() {
 
@@ -23,17 +23,13 @@ class MainFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var viewModel: MainViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(
-            this, MainViewModelFactory(requireActivity().application)
-        )[MainViewModel::class.java]
-    }
-
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        viewModel = ViewModelProvider(
+            this, App.getComponent().viewModelFactory()
+        )[MainViewModel::class.java]
         (requireActivity() as MainActivity).apply {
             statusBarVisibility(true)
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT

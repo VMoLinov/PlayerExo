@@ -9,13 +9,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import ru.test.playerexo.R
+import ru.test.playerexo.app.App
 import ru.test.playerexo.databinding.FragmentViewPagerItemBinding
 import ru.test.playerexo.model.ui.ChannelUI
 import ru.test.playerexo.ui.main.adapter.ChannelsAdapter
 import ru.test.playerexo.ui.main.adapter.OnRecycleClickListener
 import ru.test.playerexo.ui.player.PlayerFragment
 import ru.test.playerexo.viewmodel.MainViewModel
-import ru.test.playerexo.viewmodel.MainViewModelFactory
 
 class ViewPagerItem : Fragment() {
 
@@ -29,7 +29,7 @@ class ViewPagerItem : Fragment() {
         super.onCreate(savedInstanceState)
         parentFragment?.let {
             viewModel = ViewModelProvider(
-                it, MainViewModelFactory(requireActivity().application)
+                it, App.getComponent().viewModelFactory()
             )[MainViewModel::class.java]
         }
     }
