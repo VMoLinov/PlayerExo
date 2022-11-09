@@ -7,9 +7,7 @@ import kotlinx.coroutines.launch
 import ru.test.playerexo.model.ui.ChannelUI
 import ru.test.playerexo.repository.MainRepository
 
-class MainViewModel(
-    private val repository: MainRepository
-) : ViewModel() {
+class MainViewModel(private val repository: MainRepository) : ViewModel() {
 
     val allData = repository.data
     val favData = repository.favorites

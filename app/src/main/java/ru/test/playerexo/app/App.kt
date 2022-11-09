@@ -3,7 +3,6 @@ package ru.test.playerexo.app
 import android.app.Application
 import ru.test.playerexo.di.AppComponent
 import ru.test.playerexo.di.DaggerAppComponent
-import ru.test.playerexo.di.MainModule
 
 class App : Application() {
 
@@ -15,7 +14,7 @@ class App : Application() {
 
         applicationComponent = DaggerAppComponent
             .builder()
-            .mainModule(MainModule(this))
+            .context(this)
             .build()
     }
 
